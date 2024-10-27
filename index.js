@@ -25,6 +25,32 @@ app.get("/api/hello", function (req, res) {
 });
 
 
+app.get('/api/:date?', (req, res) => {
+
+  if (req.params.date == undefined) {
+    res.send({"unix": new Date().getTime(), "utc": new Date().toGMTString()})
+  }
+
+  let timestamp;
+  
+  if (!isNaN(req.params.date)) { // Check if the string can be converted to a number
+    timestamp = new Date(Number(req.params.date)).getTime(); // Convert the string to a number and create a Date object
+  } else {
+    if (!isDateValid(req.params.date)) {
+      res.send({ "error" : "Invalid Date" })
+      return;
+    }
+    timestamp = new Date(req.params.date).getTime(); // Attempt to create a Date object directly from the string
+  }
+
+  let output = {"unix": timestamp, "utc": new Date(timestamp).toGMTString()};
+
+  res.send(output);
+});
+
+function isDateValid(dateStr) {
+  return !isNaN(new Date(dateStr));
+}
 
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
